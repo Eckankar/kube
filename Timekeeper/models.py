@@ -80,7 +80,7 @@ class Avg5(models.Model):
         return CubeTime.avg(self.time1, self.time2, self.time3, self.time4, self.time5)
 
     def improvement(self):
-        prev = Avg5.objects.filter(user=self.user, session__date__lt=self.session.date).order_by('session__date')
+        prev = Avg5.objects.filter(user=self.user, session__date__lt=self.session.date).order_by('-session__date')
 
         if len(prev) == 0:
             return "N/A"
