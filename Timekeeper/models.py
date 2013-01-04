@@ -1,4 +1,5 @@
 from django.db import models
+from django import forms
 from django.contrib import admin
 from django.contrib.auth.models import User
 from operator import attrgetter
@@ -76,11 +77,11 @@ class Avg5(models.Model):
     session = models.ForeignKey(Session)
     puzzle = models.ForeignKey(Puzzle)
 
-    time1 = models.ForeignKey(CubeTime, related_name="avg5_time1")
-    time2 = models.ForeignKey(CubeTime, related_name="avg5_time2")
-    time3 = models.ForeignKey(CubeTime, related_name="avg5_time3")
-    time4 = models.ForeignKey(CubeTime, related_name="avg5_time4")
-    time5 = models.ForeignKey(CubeTime, related_name="avg5_time5")
+    time1 = models.ForeignKey(CubeTime, related_name="avg5_time1", null=True)
+    time2 = models.ForeignKey(CubeTime, related_name="avg5_time2", null=True)
+    time3 = models.ForeignKey(CubeTime, related_name="avg5_time3", null=True)
+    time4 = models.ForeignKey(CubeTime, related_name="avg5_time4", null=True)
+    time5 = models.ForeignKey(CubeTime, related_name="avg5_time5", null=True)
 
     def avg(self):
         return CubeTime.avg(self.time1, self.time2, self.time3, self.time4, self.time5)
@@ -97,7 +98,66 @@ class Avg5(models.Model):
     def __unicode__(self):
         return "%s (%s, %s, %s, %s, %s)" % (self.avg(), self.time1, self.time2, self.time3, self.time4, self.time5)
 
+class Avg5AdminForm(forms.ModelForm):
+    time1time = forms.DecimalField(max_digits=10, decimal_places=2, required=False, label="Time #1")
+    time1dnf = forms.BooleanField(initial=False, required=False, label="DNF")
+    time2time = forms.DecimalField(max_digits=10, decimal_places=2, required=False, label="Time #2")
+    time2dnf = forms.BooleanField(initial=False, required=False, label="DNF")
+    time3time = forms.DecimalField(max_digits=10, decimal_places=2, required=False, label="Time #3")
+    time3dnf = forms.BooleanField(initial=False, required=False, label="DNF")
+    time4time = forms.DecimalField(max_digits=10, decimal_places=2, required=False, label="Time #4")
+    time4dnf = forms.BooleanField(initial=False, required=False, label="DNF")
+    time5time = forms.DecimalField(max_digits=10, decimal_places=2, required=False, label="Time #5")
+    time5dnf = forms.BooleanField(initial=False, required=False, label="DNF")
+
+    def save(self, *args, **kwargs):
+        (self.instance.time1, created) = CubeTime.objects.get_or_create(timestamp = self.cleaned_data['time1time'], DNF = self.cleaned_data['time1dnf'])
+        (self.instance.time2, created) = CubeTime.objects.get_or_create(timestamp = self.cleaned_data['time2time'], DNF = self.cleaned_data['time2dnf'])
+        (self.instance.time3, created) = CubeTime.objects.get_or_create(timestamp = self.cleaned_data['time3time'], DNF = self.cleaned_data['time3dnf'])
+        (self.instance.time4, created) = CubeTime.objects.get_or_create(timestamp = self.cleaned_data['time4time'], DNF = self.cleaned_data['time4dnf'])
+        (self.instance.time5, created) = CubeTime.objects.get_or_create(timestamp = self.cleaned_data['time5time'], DNF = self.cleaned_data['time5dnf'])
+
+        return super(Avg5AdminForm, self).save(*args, **kwargs)
+
+    def __init__(self, *args, **kwargs):
+        super(Avg5AdminForm, self).__init__(*args, **kwargs)
+
+        instance = kwargs.get('instance')
+        if instance:
+            self.fields['time1time'].initial = instance.time1.timestamp
+            self.fields['time1dnf'].initial = instance.time1.DNF
+            self.fields['time2time'].initial = instance.time2.timestamp
+            self.fields['time2dnf'].initial = instance.time2.DNF
+            self.fields['time3time'].initial = instance.time3.timestamp
+            self.fields['time3dnf'].initial = instance.time3.DNF
+            self.fields['time4time'].initial = instance.time4.timestamp
+            self.fields['time4dnf'].initial = instance.time4.DNF
+            self.fields['time5time'].initial = instance.time5.timestamp
+            self.fields['time5dnf'].initial = instance.time5.DNF
+
+    class Meta:
+        model = Avg5
+        fields = ('user', 'session', 'puzzle')
+        exclude = ('time1', 'time2', 'time3', 'time4', 'time5')
+
 class Avg5Admin(admin.ModelAdmin):
+    fieldsets = (
+        (None, {
+            'fields': ('user', 'session', 'puzzle')
+        }),
+        ("Times",
+            {
+             'description': "Times must be entered as seconds. For instance, the time 1:04.45 should be entered as <i>64.45</i>.",
+             'fields': (
+                 ('time1time', 'time1dnf'),
+                 ('time2time', 'time2dnf'),
+                 ('time3time', 'time3dnf'),
+                 ('time4time', 'time4dnf'),
+                 ('time5time', 'time5dnf'),
+             )
+         })
+    )
+    form = Avg5AdminForm
     list_display = ['user', 'puzzle', 'session', 'avg', 'time1', 'time2', 'time3', 'time4', 'time5']
 
 admin.site.register(Session, SessionAdmin)
