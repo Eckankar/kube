@@ -3,14 +3,19 @@
 <html>
 <head>
     <title>KUbe</title>
+    <style>
+        .puzzle-head { font-size: larger; font-weight: bold }
+        table { border: 2px solid gray;  border-collapse: collapse; }
+        td { border: 1px solid gray; padding: 0px 3px; }
+        th { padding-left: 0.5em; padding-right: 0.5em }
+    </style>
 </head>
 <body>
 {% for session in sessions %}
 <h1>{{ session.notes }} ({{ session.date }})</h1>
-<table>
+<table cellspacing=0>
 <thead>
 <th>Name</th>
-<th>Puzzle</th>
 <th>Average</th>
 <th>Time 1</th>
 <th>Time 2</th>
@@ -19,10 +24,11 @@
 <th>Time 5</th>
 <th>Improvement</th>
 </thead>
-{% for avg in session.avgs %}
+{% for puzzle, avgs in session.avgs %}
+<tr><td colspan="8" class="puzzle-head">{{ puzzle }}</td></tr>
+{% for avg in avgs %}
 <tr>
     <td>{{ avg.user }}</td>
-    <td>{{ avg.puzzle }}</td>
     <td>{{ avg.avg }}</td>
     <td>{{ avg.time1 }}</td>
     <td>{{ avg.time2 }}</td>
@@ -31,6 +37,7 @@
     <td>{{ avg.time5 }}</td>
     <td>{{ avg.improvement }}</td>
 </tr>
+{% endfor %}
 {% endfor %}
 </table>
 {% endfor %}

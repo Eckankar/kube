@@ -1,16 +1,22 @@
-from operator import attrgetter
 from django.db import models
 from django.contrib import admin
 from django.contrib.auth.models import User
 from operator import attrgetter
-import math
+from collections import defaultdict
 
 class Session(models.Model):
     date = models.DateField()
     notes = models.TextField()
 
     def avgs(self):
-        return Avg5.objects.filter(session=self)
+        avgs = sorted(Avg5.objects.filter(session=self).all(),
+                        key=(lambda avg: (avg.avg().DNF, avg.avg().timestamp)))
+
+        groups = defaultdict(list)
+        for avg in avgs:
+            groups[avg.puzzle.name].append(avg)
+
+        return groups.items()
 
     def __unicode__(self):
         return unicode(self.date)
@@ -80,7 +86,8 @@ class Avg5(models.Model):
         return CubeTime.avg(self.time1, self.time2, self.time3, self.time4, self.time5)
 
     def improvement(self):
-        prev = Avg5.objects.filter(user=self.user, session__date__lt=self.session.date).order_by('-session__date')
+        prev = Avg5.objects.filter(user=self.user, session__date__lt=self.session.date,
+                                   puzzle=self.puzzle).order_by('-session__date')
 
         if len(prev) == 0:
             return "N/A"
