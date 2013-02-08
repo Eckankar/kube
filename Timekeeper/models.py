@@ -183,6 +183,7 @@ class Avg5Admin(admin.ModelAdmin):
     )
     form = Avg5AdminForm
     list_display = ['user', 'puzzle', 'session', 'avg', 'time1', 'time2', 'time3', 'time4', 'time5']
+    list_filter = ('puzzle', 'session')
 
 admin.site.register(Session, SessionAdmin)
 admin.site.register(Puzzle, PuzzleAdmin)
