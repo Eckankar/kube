@@ -36,25 +36,31 @@ class CubeTime(models.Model):
         if self.DNF:
             return "DNF"
 
+        plusTwo = "+2" if self.plusTwo else ""
+
         secs = ts % 60
         frac = (secs * 100) % 100
         secs._round_floor(0)
         mins = (ts - secs) // 60
-        return "%01d:%02d.%02.d" % (mins, secs, frac)
+        return "%01d:%02d.%02.d%s" % (mins, secs, frac, plusTwo)
+
+    def finalTime(self):
+        """ Time including any penalties. """
+        return self.timestamp + (2 if self.plusTwo else 0)
 
     @staticmethod
     def avg(*times):
         avg = CubeTime()
 
         avgtimes = [e for e in filter(lambda e: not e.DNF, times)]
-        avgtimes.sort(key=attrgetter('timestamp'))
+        avgtimes.sort(key=lambda e: e.finalTime())
         if len(times) - len(avgtimes) > 1: avg.DNF = True
 
         if len(avgtimes) == len(times): avgtimes.pop()
         avgtimes.pop(0)
 
         try:
-            avg.timestamp = sum(ct.timestamp for ct in avgtimes) / len(avgtimes)
+            avg.timestamp = sum(ct.finalTime() for ct in avgtimes) / len(avgtimes)
         except:
             avg.timestamp = 0
 
@@ -100,22 +106,32 @@ class Avg5(models.Model):
 
 class Avg5AdminForm(forms.ModelForm):
     time1time = forms.DecimalField(max_digits=10, decimal_places=2, required=False, label="Time #1")
+    time1plus2 = forms.BooleanField(initial=False, required=False, label="+2")
     time1dnf = forms.BooleanField(initial=False, required=False, label="DNF")
     time2time = forms.DecimalField(max_digits=10, decimal_places=2, required=False, label="Time #2")
+    time2plus2 = forms.BooleanField(initial=False, required=False, label="+2")
     time2dnf = forms.BooleanField(initial=False, required=False, label="DNF")
     time3time = forms.DecimalField(max_digits=10, decimal_places=2, required=False, label="Time #3")
+    time3plus2 = forms.BooleanField(initial=False, required=False, label="+2")
     time3dnf = forms.BooleanField(initial=False, required=False, label="DNF")
     time4time = forms.DecimalField(max_digits=10, decimal_places=2, required=False, label="Time #4")
+    time4plus2 = forms.BooleanField(initial=False, required=False, label="+2")
     time4dnf = forms.BooleanField(initial=False, required=False, label="DNF")
     time5time = forms.DecimalField(max_digits=10, decimal_places=2, required=False, label="Time #5")
+    time5plus2 = forms.BooleanField(initial=False, required=False, label="+2")
     time5dnf = forms.BooleanField(initial=False, required=False, label="DNF")
 
     def save(self, *args, **kwargs):
-        (self.instance.time1, created) = CubeTime.objects.get_or_create(timestamp = self.cleaned_data['time1time'], DNF = self.cleaned_data['time1dnf'])
-        (self.instance.time2, created) = CubeTime.objects.get_or_create(timestamp = self.cleaned_data['time2time'], DNF = self.cleaned_data['time2dnf'])
-        (self.instance.time3, created) = CubeTime.objects.get_or_create(timestamp = self.cleaned_data['time3time'], DNF = self.cleaned_data['time3dnf'])
-        (self.instance.time4, created) = CubeTime.objects.get_or_create(timestamp = self.cleaned_data['time4time'], DNF = self.cleaned_data['time4dnf'])
-        (self.instance.time5, created) = CubeTime.objects.get_or_create(timestamp = self.cleaned_data['time5time'], DNF = self.cleaned_data['time5dnf'])
+        (self.instance.time1, created) = CubeTime.objects.get_or_create(timestamp = self.cleaned_data['time1time'], DNF = self.cleaned_data['time1dnf'],
+                                                                        plusTwo = self.cleaned_data['time1plus2'])
+        (self.instance.time2, created) = CubeTime.objects.get_or_create(timestamp = self.cleaned_data['time2time'], DNF = self.cleaned_data['time2dnf'],
+                                                                        plusTwo = self.cleaned_data['time2plus2'])
+        (self.instance.time3, created) = CubeTime.objects.get_or_create(timestamp = self.cleaned_data['time3time'], DNF = self.cleaned_data['time3dnf'],
+                                                                        plusTwo = self.cleaned_data['time3plus2'])
+        (self.instance.time4, created) = CubeTime.objects.get_or_create(timestamp = self.cleaned_data['time4time'], DNF = self.cleaned_data['time4dnf'],
+                                                                        plusTwo = self.cleaned_data['time4plus2'])
+        (self.instance.time5, created) = CubeTime.objects.get_or_create(timestamp = self.cleaned_data['time5time'], DNF = self.cleaned_data['time5dnf'],
+                                                                        plusTwo = self.cleaned_data['time5plus2'])
 
         return super(Avg5AdminForm, self).save(*args, **kwargs)
 
@@ -125,14 +141,19 @@ class Avg5AdminForm(forms.ModelForm):
         instance = kwargs.get('instance')
         if instance:
             self.fields['time1time'].initial = instance.time1.timestamp
+            self.fields['time1plus2'].initial = instance.time1.plusTwo
             self.fields['time1dnf'].initial = instance.time1.DNF
             self.fields['time2time'].initial = instance.time2.timestamp
+            self.fields['time2plus2'].initial = instance.time2.plusTwo
             self.fields['time2dnf'].initial = instance.time2.DNF
             self.fields['time3time'].initial = instance.time3.timestamp
+            self.fields['time3plus2'].initial = instance.time3.plusTwo
             self.fields['time3dnf'].initial = instance.time3.DNF
             self.fields['time4time'].initial = instance.time4.timestamp
+            self.fields['time4plus2'].initial = instance.time4.plusTwo
             self.fields['time4dnf'].initial = instance.time4.DNF
             self.fields['time5time'].initial = instance.time5.timestamp
+            self.fields['time5plus2'].initial = instance.time5.plusTwo
             self.fields['time5dnf'].initial = instance.time5.DNF
 
     class Meta:
@@ -149,11 +170,11 @@ class Avg5Admin(admin.ModelAdmin):
             {
              'description': "Times must be entered as seconds. For instance, the time 1:04.45 should be entered as <i>64.45</i>.",
              'fields': (
-                 ('time1time', 'time1dnf'),
-                 ('time2time', 'time2dnf'),
-                 ('time3time', 'time3dnf'),
-                 ('time4time', 'time4dnf'),
-                 ('time5time', 'time5dnf'),
+                 ('time1time', 'time1plus2', 'time1dnf'),
+                 ('time2time', 'time2plus2', 'time2dnf'),
+                 ('time3time', 'time3plus2', 'time3dnf'),
+                 ('time4time', 'time4plus2', 'time4dnf'),
+                 ('time5time', 'time5plus2', 'time5dnf'),
              )
          })
     )
