@@ -99,7 +99,10 @@ class Avg5(models.Model):
         if len(prev) == 0:
             return "N/A"
         else:
-            return "%.2f%%" % (100 * (1 - self.avg().timestamp / prev[0].avg().timestamp))
+            prevAvg = prev[0].avg()
+            if prevAvg.DNF:
+                return "N/A"
+            return "%.2f%%" % (100 * (1 - self.avg().timestamp / prevAvg.timestamp))
 
     def __unicode__(self):
         return "%s (%s, %s, %s, %s, %s)" % (self.avg(), self.time1, self.time2, self.time3, self.time4, self.time5)
