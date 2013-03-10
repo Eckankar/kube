@@ -125,6 +125,11 @@ class Avg5AdminForm(forms.ModelForm):
     time5dnf = forms.BooleanField(initial=False, required=False, label="DNF")
 
     def save(self, *args, **kwargs):
+        for i in range(1,6):
+            t = 'time' + str(i)
+            if self.cleaned_data[t+'dnf'] and not self.cleaned_data[t+'time']:
+                self.cleaned_data[t+'time'] = 0
+
         (self.instance.time1, created) = CubeTime.objects.get_or_create(timestamp = self.cleaned_data['time1time'], DNF = self.cleaned_data['time1dnf'],
                                                                         plusTwo = self.cleaned_data['time1plus2'])
         (self.instance.time2, created) = CubeTime.objects.get_or_create(timestamp = self.cleaned_data['time2time'], DNF = self.cleaned_data['time2dnf'],
