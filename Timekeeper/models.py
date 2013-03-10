@@ -20,7 +20,7 @@ class Session(models.Model):
         return groups.items()
 
     def __unicode__(self):
-        return unicode(self.date)
+        return "%s (%s)" % (self.notes, unicode(self.date))
 
 class SessionAdmin(admin.ModelAdmin):
     pass

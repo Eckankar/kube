@@ -2,7 +2,7 @@
         "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-    <title>KUbe</title>
+    <title>KUbe - {{ profile }}</title>
     <style>
         .puzzle-head { font-size: larger; font-weight: bold }
         table { border: 2px solid gray;  border-collapse: collapse; }
@@ -29,39 +29,37 @@
     </style>
 </head>
 <body>
-<ul class="linkbox">
-    <li class="linkbox-header">Useful links</li>
-    <li><a href="http://www.cubing.net/mark2/">Scrambles</a></li>
-</ul>
-{% for session in sessions %}
-<h1>{{ session.notes }} ({{ session.date }})</h1>
+<h1>{{ profile }}</h1>
+
 <table cellspacing=0>
-<thead>
-<th>Name</th>
-<th>Average</th>
-<th>Time 1</th>
-<th>Time 2</th>
-<th>Time 3</th>
-<th>Time 4</th>
-<th>Time 5</th>
-<th>Improvement</th>
-</thead>
-{% for puzzle, avgs in session.avgs %}
-<tr><td colspan="8" class="puzzle-head">{{ puzzle }}</td></tr>
-{% for avg in avgs %}
-<tr>
-    <td><a href="{% url Timekeeper.views.userpage id=avg.user.id %}">{{ avg.user }}</a></td>
-    <td>{{ avg.avg }}</td>
-    <td>{{ avg.time1 }}</td>
-    <td>{{ avg.time2 }}</td>
-    <td>{{ avg.time3 }}</td>
-    <td>{{ avg.time4 }}</td>
-    <td>{{ avg.time5 }}</td>
-    <td>{{ avg.improvement }}</td>
-</tr>
-{% endfor %}
-{% endfor %}
+    <thead>
+    <th>Session</th>
+    <th>Average</th>
+    <th>Time 1</th>
+    <th>Time 2</th>
+    <th>Time 3</th>
+    <th>Time 4</th>
+    <th>Time 5</th>
+    <th>Improvement</th>
+    </thead>
+    {% for puzzle, times in puzzles.items %}
+        <tr><td colspan="8" class="puzzle-head">{{ puzzle }}</td></tr>
+        {% for time in times %}
+            <tr>
+                <td>{{ time.session }}</td>
+                <td>{{ time.avg }}</td>
+                <td>{{ time.time1 }}</td>
+                <td>{{ time.time2 }}</td>
+                <td>{{ time.time3 }}</td>
+                <td>{{ time.time4 }}</td>
+                <td>{{ time.time5 }}</td>
+                <td>{{ time.improvement }}</td>
+            </tr>
+        {% endfor %}
+    {% endfor %}
 </table>
-{% endfor %}
+
+<p><a href="{% url Timekeeper.views.index %}">Back to index</a></p>
+
 </body>
 </html>
