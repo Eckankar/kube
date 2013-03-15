@@ -1,67 +1,19 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
-        "http://www.w3.org/TR/html4/loose.dtd">
-<html>
-<head>
+{% extends "skeleton.html" %}
+
+{% block head_extra %}
     <title>KUbe</title>
-    <style>
-        .puzzle-head { font-size: larger; font-weight: bold }
-        table { border: 2px solid gray;  border-collapse: collapse; }
-        td { border: 1px solid gray; padding: 0px 3px; }
-        th { padding-left: 0.5em; padding-right: 0.5em }
-        .linkbox {
-            float: right;
-            border: 1px solid black;
-            padding: 0px;
-            width: 200px;
-            font-family: sans-serif;
-        }
-        .linkbox li {
-            list-style: none;
-            background-color: #FFF;
-            padding: 0.2em;
-        }
-        .linkbox .linkbox-header {
-            border-bottom: 1px solid silver;
-            font-weight: bold;
-            background-color: #EEE;
-            text-align: center;
-        }
-    </style>
-</head>
-<body>
-<ul class="linkbox">
-    <li class="linkbox-header">Useful links</li>
-    <li><a href="http://www.cubing.net/mark2/">Scrambles</a></li>
-</ul>
-{% for session in sessions %}
-<h1>{{ session.notes }} ({{ session.date }})</h1>
-<table cellspacing=0>
-<thead>
-<th>Name</th>
-<th>Average</th>
-<th>Time 1</th>
-<th>Time 2</th>
-<th>Time 3</th>
-<th>Time 4</th>
-<th>Time 5</th>
-<th>Improvement</th>
-</thead>
-{% for puzzle, avgs in session.avgs %}
-<tr><td colspan="8" class="puzzle-head">{{ puzzle }}</td></tr>
-{% for avg in avgs %}
-<tr>
-    <td><a href="{% url Timekeeper.views.userpage id=avg.user.id %}">{{ avg.user }}</a></td>
-    <td>{{ avg.avg }}</td>
-    <td>{{ avg.time1 }}</td>
-    <td>{{ avg.time2 }}</td>
-    <td>{{ avg.time3 }}</td>
-    <td>{{ avg.time4 }}</td>
-    <td>{{ avg.time5 }}</td>
-    <td>{{ avg.improvement }}</td>
-</tr>
-{% endfor %}
-{% endfor %}
-</table>
-{% endfor %}
-</body>
-</html>
+{% endblock %}
+
+{% block content %}
+    <div class="intro-box">
+    <h2>Hvad er KUbe?</h2>
+    <p>
+    KUbe er en klub for <abbr title="Folk der er glade for Rubik's cuben">speedcubere</abbr> ved Københavns Universitet.
+    </p>
+    <p>
+    Møder afholdes ca. en gang om måneden. Følg med i hvornår næste møde er på <a href="https://www.facebook.com/groups/KUbe.KU/">KUbes Facebook side</a>.
+    </p>
+    </div>
+    <h2>Resultaterne fra seneste møde</h2>
+    {% include "session-table.html" with sessions=latest_session %}
+{% endblock %}

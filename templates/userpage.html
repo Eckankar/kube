@@ -1,37 +1,13 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
-        "http://www.w3.org/TR/html4/loose.dtd">
-<html>
-<head>
+{% extends "skeleton.html" %}
+{% block extra_head %}
     <title>KUbe - {{ profile }}</title>
-    <style>
-        .puzzle-head { font-size: larger; font-weight: bold }
-        table { border: 2px solid gray;  border-collapse: collapse; }
-        td { border: 1px solid gray; padding: 0px 3px; }
-        th { padding-left: 0.5em; padding-right: 0.5em }
-        .linkbox {
-            float: right;
-            border: 1px solid black;
-            padding: 0px;
-            width: 200px;
-            font-family: sans-serif;
-        }
-        .linkbox li {
-            list-style: none;
-            background-color: #FFF;
-            padding: 0.2em;
-        }
-        .linkbox .linkbox-header {
-            border-bottom: 1px solid silver;
-            font-weight: bold;
-            background-color: #EEE;
-            text-align: center;
-        }
-    </style>
-</head>
-<body>
-<h1>{{ profile }}</h1>
+{% endblock %}
+{% block content %}
+<h1>Tider for {{ profile }}</h1>
 
-<table cellspacing=0>
+{% for puzzle, times in puzzles.items %}
+    <h2>{{ puzzle }}</h2>
+<table class="table table-bordered">
     <thead>
     <th>Session</th>
     <th>Average</th>
@@ -42,24 +18,18 @@
     <th>Time 5</th>
     <th>Improvement</th>
     </thead>
-    {% for puzzle, times in puzzles.items %}
-        <tr><td colspan="8" class="puzzle-head">{{ puzzle }}</td></tr>
         {% for time in times %}
             <tr>
-                <td>{{ time.session }}</td>
-                <td>{{ time.avg }}</td>
-                <td>{{ time.time1 }}</td>
-                <td>{{ time.time2 }}</td>
-                <td>{{ time.time3 }}</td>
-                <td>{{ time.time4 }}</td>
-                <td>{{ time.time5 }}</td>
-                <td>{{ time.improvement }}</td>
+                <td class="time time-session">{{ time.session }}</td>
+                <td class="time time-average">{{ time.avg }}</td>
+                <td class="time time-normal">{{ time.time1 }}</td>
+                <td class="time time-normal">{{ time.time2 }}</td>
+                <td class="time time-normal">{{ time.time3 }}</td>
+                <td class="time time-normal">{{ time.time4 }}</td>
+                <td class="time time-normal">{{ time.time5 }}</td>
+                <td class="time time-improvement {% if time.improvement > 0 %}positive{% elif time.improvement < 0 %}negative{% endif %}">{{ time.improvement_string }}</td>
             </tr>
         {% endfor %}
-    {% endfor %}
 </table>
-
-<p><a href="{% url Timekeeper.views.index %}">Back to index</a></p>
-
-</body>
-</html>
+{% endfor %}
+{% endblock %}

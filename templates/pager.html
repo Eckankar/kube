@@ -1,0 +1,8 @@
+<div class="pager">
+    {% if page.has_previous %}
+        <li class="previous"><a href="?page={{ page.previous_page_number }}">&larr; Yngre</a></li>
+    {% endif %}
+    {% if page.has_next %}
+        <li class="next"><a href="?page={{ page.next_page_number }}">Ældre &rarr;</a></li>
+    {% endif %}
+</div>

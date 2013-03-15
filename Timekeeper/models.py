@@ -4,6 +4,7 @@ from django.contrib import admin
 from django.contrib.auth.models import User
 from operator import attrgetter
 from collections import defaultdict
+from math import isnan
 
 class Session(models.Model):
     date = models.DateField()
@@ -14,8 +15,20 @@ class Session(models.Model):
                         key=(lambda avg: (avg.avg().DNF, avg.avg().timestamp)))
 
         groups = defaultdict(list)
+        winners = {}
         for avg in avgs:
             groups[avg.puzzle.name].append(avg)
+
+            imp = avg.improvement()
+            if not isnan(imp):
+                try:
+                    if avg.puzzle.name not in winners or winners[avg.puzzle.name][0] < imp:
+                        winners[avg.puzzle.name] = [imp, avg]
+                except:
+                    pass
+
+        for time in winners.values():
+            time[1].session_winner = True
 
         return groups.items()
 
@@ -94,15 +107,21 @@ class Avg5(models.Model):
 
     def improvement(self):
         prev = Avg5.objects.filter(user=self.user, session__date__lt=self.session.date,
-                                   puzzle=self.puzzle).order_by('-session__date')
+            puzzle=self.puzzle).order_by('-session__date')
 
         if len(prev) == 0:
-            return "N/A"
+            return float('nan')
         else:
             prevAvg = prev[0].avg()
             if prevAvg.DNF:
-                return "N/A"
-            return "%.2f%%" % (100 * (1 - self.avg().timestamp / prevAvg.timestamp))
+                return float('nan')
+            return (100 * (1 - self.avg().timestamp / prevAvg.timestamp))
+
+    def improvement_string(self):
+        imp = self.improvement()
+        if isnan(imp):
+            return "N/A"
+        return "%.2f%%" % imp
 
     def __unicode__(self):
         return "%s (%s, %s, %s, %s, %s)" % (self.avg(), self.time1, self.time2, self.time3, self.time4, self.time5)

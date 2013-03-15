@@ -1,0 +1,11 @@
+{% extends "skeleton.html" %}
+
+{% block head_extra %}
+    <title>KUbe - Møder</title>
+{% endblock %}
+
+{% block content %}
+    {% include "pager.html" with page=sessions %}
+    {% include "session-table.html" with captions="on" sessions=sessions.object_list %}
+    {% include "pager.html" with page=sessions %}
+{% endblock %}

@@ -7,6 +7,7 @@ admin.autodiscover()
 urlpatterns = patterns('',
     url(r'^$', 'Timekeeper.views.index', name='home'),
     url(r'^user/(?P<id>\d+)/$', 'Timekeeper.views.userpage'),
+    url(r'^meetings/$', 'Timekeeper.views.meetings'),
     # url(r'^KUbe_tider/', include('KUbe_tider.foo.urls')),
 
     # Uncomment the admin/doc line below to enable admin documentation:
