@@ -48,3 +48,4 @@ def userpage(request, id):
         'profile': user,
         'puzzles': sortedpuzzles,
     } ))
+

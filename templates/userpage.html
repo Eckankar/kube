@@ -1,9 +1,13 @@
 {% extends "skeleton.html" %}
-{% block extra_head %}
+{% load staticfiles %}
+{% block head_extra %}
     <title>KUbe - {{ profile }}</title>
+    <script src="{% static "js/highcharts.js" %}"></script>
 {% endblock %}
 {% block content %}
 <h1>Tider for {{ profile }}</h1>
+
+<div class="puzzle-graph" id="puzzle-graph"></div>
 
 {% for puzzle, times in puzzles.items %}
     <h2>{{ puzzle }}</h2>
@@ -32,4 +36,33 @@
         {% endfor %}
 </table>
 {% endfor %}
+    <script>
+    var formatTime = function (time) {
+        var secs = time % 60;
+        var minutes = Math.floor(time / 60);
+        var res = secs.toFixed(2);
+        if (minutes > 0) {
+            res = minutes + ":" + (secs < 10 ? '0' : '') + res;
+        }
+        return res;
+    }
+
+    $(function() {
+        "use strict";
+
+        $.get('/api/user/{{ profile.id }}', function (response) {
+            var data = response.chartData;
+            data.yAxis = {
+                'title': { 'text': "Tid" },
+                'labels': { 'formatter': function () { return formatTime(this.value); } }
+            };
+            data.tooltip = {
+                'formatter': function () {
+                    return "<strong>" + this.x + "</strong><br/><strong>" + this.series.name + ":</strong> " + formatTime(this.y);
+                }
+            }
+            $('#puzzle-graph').highcharts(data);
+        });
+    })
+    </script>
 {% endblock %}
