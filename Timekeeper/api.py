@@ -31,6 +31,7 @@ def user_api(request, id):
         }
 
         for time in times:
+            if time.avg().DNF: continue
             series['data'].append([time.session.id - 1, float(time.avg().timestamp)])
 
         response['chartData']['series'].append(series)
