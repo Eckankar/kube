@@ -24,6 +24,11 @@ h2 {
     font-weight: bold;
 }
 
+#page-content .puzzle-head {
+    background-color: #ececec;
+    padding-left: 5pt;
+}
+
 .session-winner .time-improvement {
     font-weight: bold;
     color: green;
