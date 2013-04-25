@@ -113,7 +113,7 @@ class Avg5(models.Model):
             return float('nan')
         else:
             prevAvg = prev[0].avg()
-            if prevAvg.DNF:
+            if prevAvg.DNF or self.avg().DNF:
                 return float('nan')
             return (100 * (1 - self.avg().timestamp / prevAvg.timestamp))
 
